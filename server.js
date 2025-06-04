@@ -10,6 +10,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());  // Necesitarás instalar: npm install cors
 
 // Importar rutas
+const authRoutes = require('./src/routes/auth');
 const productosRoutes = require('./src/routes/productos');
 const usuariosRoutes = require('./src/routes/usuarios');
 const pedidosRoutes = require('./src/routes/pedidos');
@@ -18,6 +19,7 @@ const categoriasRoutes = require('./src/routes/categorias');
 const favoritosRoutes = require('./src/routes/favoritos');
 
 // Usar rutas
+app.use('/api/auth', authRoutes);
 app.use('/api/productos', productosRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/pedidos', pedidosRoutes);
@@ -48,7 +50,8 @@ async function startServer() {
     await seedData();
 
     // Arrancar el servidor solo después de que todo esté listo
-    const PORT = process.env.PORT || 3001;
+    const PORT = process.env.
+    PORT || 3001;
     app.listen(PORT, () => {
       console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
     });
@@ -59,3 +62,4 @@ async function startServer() {
 }
 
 startServer();
+const PORT = process.env.PORT || 3002;  // Cambia a otro puertoconst PORT = process.env.PORT || 3002;  // Cambia a otro puertoconst PORT = process.env.PORT || 3002;  // Cambia a otro puertoconst PORT = process.env.PORT || 3002;  // Cambia a otro puertoconst PORT = process.env.PORT || 3002;  // Cambia a otro puertoconst PORT = process.env.PORT || 3002;  // Cambia a otro puerto
