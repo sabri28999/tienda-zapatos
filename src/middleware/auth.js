@@ -9,7 +9,7 @@ module.exports = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const usuario = await Usuario.findByPk(decoded.id);
+    const usuario = await Usuario.findOne({ where: { idUsuario: decoded.id } });
 
     if (!usuario) {
       return res.status(401).json({ message: 'Usuario no encontrado' });
