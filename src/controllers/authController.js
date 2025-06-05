@@ -32,11 +32,15 @@ const registro = async (req, res) => {
       return res.status(400).json({ message: 'El email ya está registrado' });
     }
 
+    // 🔒 Encriptar contraseña antes de guardar
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(contraseña, salt);
+
     // Crear nuevo usuario
     const usuario = await Usuario.create({
       nombre,
       email,
-      contraseña,
+      contraseña: hashedPassword,
       esAdmin: false
     });
 
@@ -63,26 +67,23 @@ const registro = async (req, res) => {
 // Login de usuario
 const login = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
     const { email, contraseña } = req.body;
 
-    // Buscar usuario
+    console.log("Login recibido:", email, contraseña);
+
     const usuario = await Usuario.findOne({ where: { email } });
+
     if (!usuario) {
+      console.log("Usuario no encontrado");
       return res.status(401).json({ message: 'Credenciales inválidas' });
     }
 
-    // Verificar contraseña
     const contraseñaValida = await bcrypt.compare(contraseña, usuario.contraseña);
     if (!contraseñaValida) {
+      console.log("Contraseña incorrecta");
       return res.status(401).json({ message: 'Credenciales inválidas' });
     }
 
-    // Generar JWT
     const token = generarJWT(usuario);
 
     res.json({
@@ -101,6 +102,7 @@ const login = async (req, res) => {
     res.status(500).json({ message: 'Error en el servidor' });
   }
 };
+
 
 module.exports = {
   registro,
