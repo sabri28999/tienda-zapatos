@@ -1,45 +1,75 @@
 const express = require('express');
 const router = express.Router();
-const { Pedido, DetallePedido, Producto } = require('../models');
+const { Pedido, ItemPedido, Producto, Carrito, ItemCarrito } = require('../models');
 const auth = require('../middleware/auth');
 
-// Crear nuevo pedido
+// Crear nuevo pedido desde el carrito
 router.post('/', auth, async (req, res) => {
   try {
-    const { productos, direccionEnvio } = req.body;
+    const { direccionEnvio } = req.body;
     
-    // Crear pedido
-    const pedido = await Pedido.create({
-      usuarioId: req.usuario.id,
-      direccionEnvio,
-      estado: 'pendiente'
+    // Obtener el carrito del usuario con sus items
+    const carrito = await Carrito.findOne({
+      where: { idUsuario: req.usuario.idUsuario },
+      include: [{
+        model: ItemCarrito,
+        as: 'items',
+        include: [{
+          model: Producto,
+          as: 'producto'
+        }]
+      }]
     });
 
-    // Crear detalles del pedido
-    for (let item of productos) {
-      const producto = await Producto.findByPk(item.productoId);
-      if (!producto) {
-        throw new Error(`Producto ${item.productoId} no encontrado`);
-      }
+    if (!carrito || !carrito.items.length) {
+      return res.status(400).json({ message: 'El carrito está vacío' });
+    }
 
-      await DetallePedido.create({
-        pedidoId: pedido.id,
-        productoId: item.productoId,
+    // Calcular monto total
+    let montoTotal = 0;
+    for (const item of carrito.items) {
+      montoTotal += item.cantidad * item.producto.precio;
+    }
+
+    // Crear pedido
+    const pedido = await Pedido.create({
+      idUsuario: req.usuario.idUsuario,
+      direccionEnvio,
+      estado: 'pendiente',
+      montoTotal,
+      fecha: new Date()
+    });
+
+    // Crear items del pedido basados en el carrito
+    for (const item of carrito.items) {
+      await ItemPedido.create({
+        idPedido: pedido.idPedido,
+        idProducto: item.idProducto,
         cantidad: item.cantidad,
-        precio: producto.precio
+        precioUnitario: item.producto.precio
       });
     }
 
+    // Vaciar el carrito después de crear el pedido
+    await ItemCarrito.destroy({
+      where: { idCarrito: carrito.idCarrito }
+    });
+
     // Devolver pedido con sus detalles
-    const pedidoCompleto = await Pedido.findByPk(pedido.id, {
+    const pedidoCompleto = await Pedido.findByPk(pedido.idPedido, {
       include: [{
-        model: DetallePedido,
-        include: [Producto]
+        model: ItemPedido,
+        as: 'items',
+        include: [{
+          model: Producto,
+          as: 'producto'
+        }]
       }]
     });
 
     res.status(201).json(pedidoCompleto);
   } catch (error) {
+    console.error('Error al crear pedido:', error);
     res.status(400).json({ message: error.message });
   }
 });
@@ -48,10 +78,14 @@ router.post('/', auth, async (req, res) => {
 router.get('/', auth, async (req, res) => {
   try {
     const pedidos = await Pedido.findAll({
-      where: { usuarioId: req.usuario.id },
+      where: { idUsuario: req.usuario.idUsuario }, // También corregir idUsuario
       include: [{
-        model: DetallePedido,
-        include: [Producto]
+        model: ItemPedido, // Cambiar DetallePedido por ItemPedido
+        as: 'items',
+        include: [{
+          model: Producto,
+          as: 'producto'
+        }]
       }]
     });
     res.json(pedidos);
@@ -65,12 +99,16 @@ router.get('/:id', auth, async (req, res) => {
   try {
     const pedido = await Pedido.findOne({
       where: { 
-        id: req.params.id,
-        usuarioId: req.usuario.id
+        idPedido: req.params.id, // Cambiar id por idPedido
+        idUsuario: req.usuario.idUsuario // Cambiar usuarioId por idUsuario
       },
       include: [{
-        model: DetallePedido,
-        include: [Producto]
+        model: ItemPedido, // Cambiar DetallePedido por ItemPedido
+        as: 'items',
+        include: [{
+          model: Producto,
+          as: 'producto'
+        }]
       }]
     });
 
