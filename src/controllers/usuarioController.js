@@ -5,12 +5,18 @@ const bcrypt = require('bcryptjs');
 // Obtener detalles de un usuario
 const obtenerUsuario = async (req, res) => {
   try {
-    const usuario = await Usuario.findByPk(req.params.id, {
+    const usuario = await Usuario.findOne({
+      where: { idUsuario: req.params.id },
       attributes: { exclude: ['contraseña'] }
     });
 
     if (!usuario) {
       return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    // Verificar si es el mismo usuario o un admin
+    if (req.usuario.idUsuario !== usuario.idUsuario && !req.usuario.esAdmin) {
+      return res.status(403).json({ message: 'No autorizado para ver este usuario' });
     }
 
     res.json(usuario);
@@ -19,6 +25,8 @@ const obtenerUsuario = async (req, res) => {
     res.status(500).json({ message: 'Error al obtener usuario' });
   }
 };
+
+
 
 // Editar usuario
 const editarUsuario = async (req, res) => {
