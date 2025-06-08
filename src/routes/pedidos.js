@@ -3,12 +3,12 @@ const router = express.Router();
 const { Pedido, ItemPedido, Producto, Carrito, ItemCarrito } = require('../models');
 const auth = require('../middleware/auth');
 
-// Crear nuevo pedido desde el carrito
+
 router.post('/', auth, async (req, res) => {
   try {
     const { direccionEnvio } = req.body;
     
-    // Obtener el carrito del usuario con sus items
+   
     const carrito = await Carrito.findOne({
       where: { idUsuario: req.usuario.idUsuario },
       include: [{
@@ -25,13 +25,13 @@ router.post('/', auth, async (req, res) => {
       return res.status(400).json({ message: 'El carrito está vacío' });
     }
 
-    // Calcular monto total
+    
     let montoTotal = 0;
     for (const item of carrito.items) {
       montoTotal += item.cantidad * item.producto.precio;
     }
 
-    // Crear pedido
+   
     const pedido = await Pedido.create({
       idUsuario: req.usuario.idUsuario,
       direccionEnvio,
@@ -40,7 +40,6 @@ router.post('/', auth, async (req, res) => {
       fecha: new Date()
     });
 
-    // Crear items del pedido basados en el carrito
     for (const item of carrito.items) {
       await ItemPedido.create({
         idPedido: pedido.idPedido,
@@ -50,12 +49,11 @@ router.post('/', auth, async (req, res) => {
       });
     }
 
-    // Vaciar el carrito después de crear el pedido
     await ItemCarrito.destroy({
       where: { idCarrito: carrito.idCarrito }
     });
 
-    // Devolver pedido con sus detalles
+
     const pedidoCompleto = await Pedido.findByPk(pedido.idPedido, {
       include: [{
         model: ItemPedido,
@@ -74,13 +72,12 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// Obtener pedidos del usuario
 router.get('/', auth, async (req, res) => {
   try {
     const pedidos = await Pedido.findAll({
-      where: { idUsuario: req.usuario.idUsuario }, // También corregir idUsuario
+      where: { idUsuario: req.usuario.idUsuario },
       include: [{
-        model: ItemPedido, // Cambiar DetallePedido por ItemPedido
+        model: ItemPedido, 
         as: 'items',
         include: [{
           model: Producto,
@@ -94,16 +91,16 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// Obtener un pedido específico
+
 router.get('/:id', auth, async (req, res) => {
   try {
     const pedido = await Pedido.findOne({
       where: { 
-        idPedido: req.params.id, // Cambiar id por idPedido
-        idUsuario: req.usuario.idUsuario // Cambiar usuarioId por idUsuario
+        idPedido: req.params.id, 
+        idUsuario: req.usuario.idUsuario 
       },
       include: [{
-        model: ItemPedido, // Cambiar DetallePedido por ItemPedido
+        model: ItemPedido, 
         as: 'items',
         include: [{
           model: Producto,

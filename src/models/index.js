@@ -1,6 +1,6 @@
 const sequelize = require('../config/database');
 
-// Importar todos los modelos
+
 const Usuario = require('./Usuario');
 const Categoria = require('./Categoria');
 const Talle = require('./Talle');
@@ -11,9 +11,9 @@ const Pedido = require('./Pedido');
 const ItemPedido = require('./ItemPedido');
 const Favorito = require('./Favorito');
 
-// Definir asociaciones
+
 function defineAssociations() {
-  // Usuario - Carrito (1:1)
+  
   Usuario.hasOne(Carrito, {
     foreignKey: 'idUsuario',
     as: 'carrito'
@@ -23,7 +23,7 @@ function defineAssociations() {
     as: 'usuario'
   });
 
-  // Usuario - Pedidos (1:N)
+  
   Usuario.hasMany(Pedido, {
     foreignKey: 'idUsuario',
     as: 'pedidos'
@@ -33,7 +33,7 @@ function defineAssociations() {
     as: 'usuario'
   });
 
-  // Usuario - Favoritos (1:N)
+
   Usuario.hasMany(Favorito, {
     foreignKey: 'idUsuario',
     as: 'favoritos'
@@ -43,7 +43,7 @@ function defineAssociations() {
     as: 'usuario'
   });
 
-  // Categoria - Productos (1:N)
+ 
   Categoria.hasMany(Producto, {
     foreignKey: 'idCategoria',
     as: 'productos'
@@ -53,7 +53,7 @@ function defineAssociations() {
     as: 'categoria'
   });
 
-  // Producto - Talles (N:M)
+ 
   Producto.belongsToMany(Talle, {
     through: 'ProductoTalles',
     foreignKey: 'idProducto',
@@ -67,7 +67,7 @@ function defineAssociations() {
     as: 'productos'
   });
 
-  // Carrito - ItemCarrito (1:N)
+  
   Carrito.hasMany(ItemCarrito, {
     foreignKey: 'idCarrito',
     as: 'items'
@@ -77,7 +77,7 @@ function defineAssociations() {
     as: 'carrito'
   });
 
-  // Producto - ItemCarrito (1:N)
+ 
   Producto.hasMany(ItemCarrito, {
     foreignKey: 'idProducto',
     as: 'itemsCarrito'
@@ -87,7 +87,7 @@ function defineAssociations() {
     as: 'producto'
   });
 
-  // Pedido - ItemPedido (1:N)
+
   Pedido.hasMany(ItemPedido, {
     foreignKey: 'idPedido',
     as: 'items'
@@ -97,7 +97,6 @@ function defineAssociations() {
     as: 'pedido'
   });
 
-  // Producto - ItemPedido (1:N)
   Producto.hasMany(ItemPedido, {
     foreignKey: 'idProducto',
     as: 'itemsPedido'
@@ -107,7 +106,7 @@ function defineAssociations() {
     as: 'producto'
   });
 
-  // Producto - Favoritos (1:N)
+
   Producto.hasMany(Favorito, {
     foreignKey: 'idProducto',
     as: 'favoritos'
@@ -118,10 +117,10 @@ function defineAssociations() {
   });
 }
 
-// Llamar a la función para definir asociaciones
+
 defineAssociations();
 
-// Exportar todos los modelos
+
 module.exports = {
   sequelize,
   Usuario,
@@ -133,4 +132,4 @@ module.exports = {
   Pedido,
   ItemPedido,
   Favorito
-};
+}; 

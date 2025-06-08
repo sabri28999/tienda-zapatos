@@ -4,7 +4,7 @@ const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const { Producto, Categoria, Talle } = require('../models');
 
-// GET /api/productos - Obtener todos los productos
+
 router.get('/', async (req, res) => {
   try {
     const productos = await Producto.findAll({
@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/productos/:id - Obtener un producto por ID
+
 router.get('/:id', async (req, res) => {
   try {
     const producto = await Producto.findByPk(req.params.id, {
@@ -37,7 +37,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST /api/productos - Crear nuevo producto (solo admin)
+
 router.post('/', [auth, admin], async (req, res) => {
   try {
     const producto = await Producto.create(req.body);
@@ -50,7 +50,7 @@ router.post('/', [auth, admin], async (req, res) => {
   }
 });
 
-// PUT /api/productos/:id - Actualizar producto (solo admin)
+
 router.put('/:id', [auth, admin], async (req, res) => {
   try {
     const producto = await Producto.findByPk(req.params.id);
@@ -67,7 +67,7 @@ router.put('/:id', [auth, admin], async (req, res) => {
   }
 });
 
-// DELETE /api/productos/:id - Eliminar producto (solo admin)
+
 router.delete('/:id', [auth, admin], async (req, res) => {
   try {
     const producto = await Producto.findByPk(req.params.id);

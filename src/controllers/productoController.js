@@ -1,117 +1,89 @@
+
 const { Producto, Categoria, Talle } = require('../models');
 const { validationResult } = require('express-validator');
+const { catchAsync } = require('../utils/helpers');
 
-// Obtener todos los productos
-const obtenerProductos = async (req, res) => {
-  try {
-    const { categoria, talle } = req.query;
-    let opciones = {
-      include: [{ model: Categoria, as: 'categoria' }]
-    };
+const obtenerProductos = catchAsync(async (req, res) => {
+  const { categoria, talle } = req.query;
+  const opciones = {
+    include: [{ model: Categoria, as: 'categoria' }]
+  };
 
-    if (categoria) {
-      opciones.where = { ...opciones.where, idCategoria: categoria };
-    }
-
-    if (talle) {
-      opciones.include.push({
-        model: Talle,
-        as: 'talles',
-        where: { valor: talle }
-      });
-    }
-
-    const productos = await Producto.findAll(opciones);
-    res.json(productos);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al obtener productos' });
+  if (categoria) {
+    opciones.where = { ...opciones.where, idCategoria: categoria };
   }
-};
 
-// Obtener un producto por ID
-const obtenerProductoPorId = async (req, res) => {
-  try {
-    const producto = await Producto.findByPk(req.params.id, {
-      include: [
-        { model: Categoria, as: 'categoria' },
-        { model: Talle, as: 'talles' }
-      ]
+  if (talle) {
+    opciones.include.push({
+      model: Talle,
+      as: 'talles',
+      where: { valor: talle }
     });
-
-    if (!producto) {
-      return res.status(404).json({ message: 'Producto no encontrado' });
-    }
-
-    res.json(producto);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al obtener el producto' });
   }
-};
 
-// Crear un nuevo producto
-const crearProducto = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+  const productos = await Producto.findAll(opciones);
+  res.json(productos);
+});
 
-    const producto = await Producto.create(req.body);
-    
-    if (req.body.talles && Array.isArray(req.body.talles)) {
-      await producto.setTalles(req.body.talles);
-    }
+const obtenerProductoPorId = catchAsync(async (req, res) => {
+  const producto = await Producto.findByPk(req.params.id, {
+    include: [
+      { model: Categoria, as: 'categoria' },
+      { model: Talle, as: 'talles' }
+    ]
+  });
 
-    res.status(201).json(producto);
-  } catch (error) {
-    console.error(error);
-    res.status(400).json({ message: 'Error al crear el producto' });
+  if (!producto) {
+    return res.status(404).json({ message: 'Producto no encontrado' });
   }
-};
 
-// Actualizar un producto
-const actualizarProducto = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+  res.json(producto);
+});
 
-    const producto = await Producto.findByPk(req.params.id);
-    if (!producto) {
-      return res.status(404).json({ message: 'Producto no encontrado' });
-    }
-
-    await producto.update(req.body);
-
-    if (req.body.talles && Array.isArray(req.body.talles)) {
-      await producto.setTalles(req.body.talles);
-    }
-
-    res.json(producto);
-  } catch (error) {
-    console.error(error);
-    res.status(400).json({ message: 'Error al actualizar el producto' });
+const crearProducto = catchAsync(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
-};
 
-// Eliminar un producto
-const eliminarProducto = async (req, res) => {
-  try {
-    const producto = await Producto.findByPk(req.params.id);
-    if (!producto) {
-      return res.status(404).json({ message: 'Producto no encontrado' });
-    }
+  const producto = await Producto.create(req.body);
 
-    await producto.destroy();
-    res.json({ message: 'Producto eliminado correctamente' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al eliminar el producto' });
+  if (Array.isArray(req.body.talles)) {
+    await producto.setTalles(req.body.talles);
   }
-};
+
+  res.status(201).json(producto);
+});
+
+const actualizarProducto = catchAsync(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const producto = await Producto.findByPk(req.params.id);
+  if (!producto) {
+    return res.status(404).json({ message: 'Producto no encontrado' });
+  }
+
+  await producto.update(req.body);
+
+  if (Array.isArray(req.body.talles)) {
+    await producto.setTalles(req.body.talles);
+  }
+
+  res.json(producto);
+});
+
+const eliminarProducto = catchAsync(async (req, res) => {
+  const producto = await Producto.findByPk(req.params.id);
+  if (!producto) {
+    return res.status(404).json({ message: 'Producto no encontrado' });
+  }
+
+  await producto.destroy();
+  res.json({ message: 'Producto eliminado correctamente' });
+});
 
 module.exports = {
   obtenerProductos,

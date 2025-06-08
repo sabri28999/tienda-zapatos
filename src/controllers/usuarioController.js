@@ -1,104 +1,48 @@
-const { Usuario } = require('../models');
-const { validationResult } = require('express-validator');
-const bcrypt = require('bcryptjs');
 
-// Obtener detalles de un usuario
-const obtenerUsuario = async (req, res) => {
-  try {
-    const usuario = await Usuario.findOne({
-      where: { idUsuario: req.params.id },
-      attributes: { exclude: ['contraseña'] }
-    });
+const { validationResult } = require('express-validator')
+const usuarioService = require('../services/usuarioService')
+const { catchAsync, pick, sendResponse } = require('../utils/helpers')
 
-    if (!usuario) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
-    }
+exports.perfilUsuario = catchAsync(async (req, res) => {
+  const usuario = await usuarioService.getById(
+    req.usuario.idUsuario,
+    req.usuario
+  )
+  sendResponse(res, 200, usuario)
+})
 
-    // Verificar si es el mismo usuario o un admin
-    if (req.usuario.idUsuario !== usuario.idUsuario && !req.usuario.esAdmin) {
-      return res.status(403).json({ message: 'No autorizado para ver este usuario' });
-    }
+exports.obtenerUsuario = catchAsync(async (req, res) => {
+  const usuario = await usuarioService.getById(
+    +req.params.id,
+    req.usuario
+  )
+  sendResponse(res, 200, usuario)
+})
 
-    res.json(usuario);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al obtener usuario' });
+exports.editarUsuario = catchAsync(async (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() })
   }
-};
+
+  const camposPermitidos = ['nombre', 'email', 'contraseña']
+  const cambios = pick(req.body, camposPermitidos)
+
+  const usuarioActualizado = await usuarioService.update(
+    +req.params.id,
+    cambios,
+    req.usuario
+  )
+  sendResponse(res, 200, usuarioActualizado, 'Usuario actualizado correctamente')
+})
+
+exports.eliminarUsuario = catchAsync(async (req, res) => {
+  await usuarioService.delete(
+    +req.params.id,
+    req.usuario
+  )
+  sendResponse(res, 200, null, 'Usuario eliminado correctamente')
+})
 
 
 
-// Editar usuario
-const editarUsuario = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const usuario = await Usuario.findByPk(req.params.id);
-    if (!usuario) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
-    }
-
-    // Verificar si el usuario actual es el dueño del perfil o es admin
-    if (req.usuario.idUsuario !== usuario.idUsuario && !req.usuario.esAdmin) {
-      return res.status(403).json({ message: 'No autorizado para editar este usuario' });
-    }
-
-    const { nombre, email, contraseña } = req.body;
-
-    // Si se está actualizando el email, verificar que no exista
-    if (email && email !== usuario.email) {
-      const emailExiste = await Usuario.findOne({ where: { email } });
-      if (emailExiste) {
-        return res.status(400).json({ message: 'El email ya está en uso' });
-      }
-    }
-
-    // Actualizar campos
-    if (nombre) usuario.nombre = nombre;
-    if (email) usuario.email = email;
-    if (contraseña) {
-      usuario.contraseña = await bcrypt.hash(contraseña, 12);
-    }
-
-    await usuario.save();
-
-    // Excluir contraseña de la respuesta
-    const usuarioActualizado = usuario.toJSON();
-    delete usuarioActualizado.contraseña;
-
-    res.json(usuarioActualizado);
-  } catch (error) {
-    console.error(error);
-    res.status(400).json({ message: 'Error al actualizar usuario' });
-  }
-};
-
-// Eliminar usuario
-const eliminarUsuario = async (req, res) => {
-  try {
-    const usuario = await Usuario.findByPk(req.params.id);
-    if (!usuario) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
-    }
-
-    // Solo el propio usuario o un admin pueden eliminar la cuenta
-    if (req.usuario.idUsuario !== usuario.idUsuario && !req.usuario.esAdmin) {
-      return res.status(403).json({ message: 'No autorizado para eliminar este usuario' });
-    }
-
-    await usuario.destroy();
-    res.json({ message: 'Usuario eliminado correctamente' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al eliminar usuario' });
-  }
-};
-
-module.exports = {
-  obtenerUsuario,
-  editarUsuario,
-  eliminarUsuario
-};

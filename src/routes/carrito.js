@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const { Carrito, ItemCarrito, Producto } = require('../models');
 
-// Obtener el carrito del usuario
+
 router.get('/', auth, async (req, res) => {
   try {
     const carrito = await Carrito.findOne({
@@ -28,7 +28,7 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// Agregar item al carrito
+
 router.post('/items', auth, async (req, res) => {
   try {
     const { idProducto, cantidad } = req.body;
@@ -41,13 +41,13 @@ router.post('/items', auth, async (req, res) => {
       return res.status(404).json({ message: 'Carrito no encontrado' });
     }
 
-    // Verificar si el producto existe
+  
     const producto = await Producto.findByPk(idProducto);
     if (!producto) {
       return res.status(404).json({ message: 'Producto no encontrado' });
     }
 
-    // Verificar si el producto ya está en el carrito
+   
     let itemCarrito = await ItemCarrito.findOne({
       where: {
         idCarrito: carrito.idCarrito,
@@ -56,11 +56,10 @@ router.post('/items', auth, async (req, res) => {
     });
 
     if (itemCarrito) {
-      // Actualizar cantidad si ya existe
+     
       itemCarrito.cantidad = cantidad;
       await itemCarrito.save();
-    } else {
-      // Crear nuevo item si no existe
+    } else{
       itemCarrito = await ItemCarrito.create({
         idCarrito: carrito.idCarrito,
         idProducto,
@@ -74,7 +73,7 @@ router.post('/items', auth, async (req, res) => {
   }
 });
 
-// Eliminar item del carrito
+
 router.delete('/items/:idProducto', auth, async (req, res) => {
   try {
     const carrito = await Carrito.findOne({
@@ -98,7 +97,7 @@ router.delete('/items/:idProducto', auth, async (req, res) => {
   }
 });
 
-// Vaciar carrito
+
 router.delete('/', auth, async (req, res) => {
   try {
     const carrito = await Carrito.findOne({

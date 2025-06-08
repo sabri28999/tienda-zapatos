@@ -1,139 +1,78 @@
+// src/controllers/pedidoController.js
 const { Pedido, ItemPedido, Producto } = require('../models');
 const { validationResult } = require('express-validator');
+const { catchAsync, sendResponse } = require('../utils/helpers');
 
-// Crear nuevo pedido
-const crearPedido = async (req, res) => {
-    try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
+exports.crearPedido = catchAsync(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
 
-        const { items, direccionEnvio } = req.body;
-        
-        // Crear pedido
-        const pedido = await Pedido.create({
-            idUsuario: req.usuario.id,
-            direccionEnvio,
-            estado: 'pendiente',
-            fecha: new Date(),
-            montoTotal: 0
-        });
+  const { items, direccionEnvio } = req.body;
+  const pedido = await Pedido.create({
+    idUsuario: req.usuario.idUsuario,
+    direccionEnvio,
+    estado: 'pendiente',
+    fecha: new Date(),
+    montoTotal: 0
+  });
 
-        let montoTotal = 0;
+  let montoTotal = 0;
+  for (const item of items) {
+    const producto = await Producto.findByPk(item.idProducto);
+    if (!producto) throw { status: 404, message: `Producto ${item.idProducto} no encontrado` };
+    const subtotal = producto.precio * item.cantidad;
+    montoTotal += subtotal;
+    await ItemPedido.create({
+      idPedido: pedido.idPedido,
+      idProducto: item.idProducto,
+      cantidad: item.cantidad,
+      precioUnitario: producto.precio
+    });
+  }
 
-        // Crear items del pedido
-        for (let item of items) {
-            const producto = await Producto.findByPk(item.idProducto);
-            if (!producto) {
-                throw new Error(`Producto ${item.idProducto} no encontrado`);
-            }
+  await pedido.update({ montoTotal });
+  const pedidoCompleto = await Pedido.findByPk(pedido.idPedido, {
+    include: [{ model: ItemPedido, include: [Producto] }]
+  });
 
-            const subtotal = producto.precio * item.cantidad;
-            montoTotal += subtotal;
+  sendResponse(res, 201, pedidoCompleto, 'Pedido creado correctamente');
+});
 
-            await ItemPedido.create({
-                idPedido: pedido.id,
-                idProducto: item.idProducto,
-                cantidad: item.cantidad,
-                precioUnitario: producto.precio
-            });
-        }
+exports.obtenerPedidosUsuario = catchAsync(async (req, res) => {
+  const pedidos = await Pedido.findAll({
+    where: { idUsuario: req.usuario.idUsuario },
+    include: [{ model: ItemPedido, include: [Producto] }],
+    order: [['fecha', 'DESC']]
+  });
+  sendResponse(res, 200, pedidos);
+});
 
-        // Actualizar monto total
-        await pedido.update({ montoTotal });
+exports.obtenerPedido = catchAsync(async (req, res) => {
+  const pedido = await Pedido.findOne({
+    where: { idPedido: req.params.id, idUsuario: req.usuario.idUsuario },
+    include: [{ model: ItemPedido, include: [Producto] }]
+  });
+  if (!pedido) throw { status: 404, message: 'Pedido no encontrado' };
+  sendResponse(res, 200, pedido);
+});
 
-        // Devolver pedido con sus items
-        const pedidoCompleto = await Pedido.findByPk(pedido.id, {
-            include: [{
-                model: ItemPedido,
-                include: [Producto]
-            }]
-        });
+exports.actualizarEstadoPedido = catchAsync(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
 
-        res.status(201).json(pedidoCompleto);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
+  const { estado } = req.body;
+  const pedido = await Pedido.findOne({
+    where: { idPedido: req.params.id, idUsuario: req.usuario.idUsuario }
+  });
+  if (!pedido) throw { status: 404, message: 'Pedido no encontrado' };
 
-// Obtener pedidos del usuario
-const obtenerPedidosUsuario = async (req, res) => {
-    try {
-        const pedidos = await Pedido.findAll({
-            where: { idUsuario: req.usuario.id },
-            include: [{
-                model: ItemPedido,
-                include: [Producto]
-            }],
-            order: [["fecha", "DESC"]]
-        });
-        res.json(pedidos);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
+  const estadosValidos = ['pendiente','confirmado','en_proceso','enviado','entregado','cancelado'];
+  if (!estadosValidos.includes(estado)) throw { status: 400, message: 'Estado no válido' };
 
-// Obtener un pedido específico
-const obtenerPedido = async (req, res) => {
-    try {
-        const pedido = await Pedido.findOne({
-            where: { 
-                idPedido: req.params.id,
-                idUsuario: req.usuario.id
-            },
-            include: [{
-                model: ItemPedido,
-                include: [Producto]
-            }]
-        });
-
-        if (!pedido) {
-            return res.status(404).json({ message: 'Pedido no encontrado' });
-        }
-
-        res.json(pedido);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-// Actualizar estado del pedido
-const actualizarEstadoPedido = async (req, res) => {
-    try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
-        const { estado } = req.body;
-        const pedido = await Pedido.findOne({
-            where: { 
-                idPedido: req.params.id,
-                idUsuario: req.usuario.id
-            }
-        });
-
-        if (!pedido) {
-            return res.status(404).json({ message: 'Pedido no encontrado' });
-        }
-
-        // Verificar que el estado sea válido
-        const estadosValidos = ['pendiente', 'confirmado', 'en_proceso', 'enviado', 'entregado', 'cancelado'];
-        if (!estadosValidos.includes(estado)) {
-            return res.status(400).json({ message: 'Estado no válido' });
-        }
-
-        await pedido.update({ estado });
-        res.json(pedido);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-module.exports = {
-    crearPedido,
-    obtenerPedidosUsuario,
-    obtenerPedido,
-    actualizarEstadoPedido
-};
+  await pedido.update({ estado });
+  sendResponse(res, 200, pedido, 'Estado de pedido actualizado');
+});

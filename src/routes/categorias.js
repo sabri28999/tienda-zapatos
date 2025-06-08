@@ -4,7 +4,7 @@ const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const { Categoria, Producto } = require('../models');
 
-// GET /api/categorias - Obtener todas las categorías
+
 router.get('/', async (req, res) => {
   try {
     const categorias = await Categoria.findAll({
@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/categorias/:id - Obtener una categoría por ID
+
 router.get('/:id', async (req, res) => {
   try {
     const categoria = await Categoria.findByPk(req.params.id, {
@@ -39,7 +39,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST /api/categorias - Crear nueva categoría (solo admin)
+
 router.post('/', [auth, admin], async (req, res) => {
   try {
     const { nombreCategoria } = req.body;
@@ -59,7 +59,7 @@ router.post('/', [auth, admin], async (req, res) => {
   }
 });
 
-// PUT /api/categorias/:id - Actualizar categoría (solo admin)
+
 router.put('/:id', [auth, admin], async (req, res) => {
   try {
     const categoria = await Categoria.findByPk(req.params.id);
@@ -75,7 +75,7 @@ router.put('/:id', [auth, admin], async (req, res) => {
   }
 });
 
-// DELETE /api/categorias/:id - Eliminar categoría (solo admin)
+
 router.delete('/:id', [auth, admin], async (req, res) => {
   try {
     const categoria = await Categoria.findByPk(req.params.id);
@@ -84,7 +84,7 @@ router.delete('/:id', [auth, admin], async (req, res) => {
       return res.status(404).json({ message: 'Categoría no encontrada' });
     }
 
-    // Verificar si hay productos en esta categoría
+    
     const productosEnCategoria = await Producto.count({
       where: { idCategoria: req.params.id }
     });

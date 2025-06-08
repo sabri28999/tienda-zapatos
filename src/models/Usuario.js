@@ -1,3 +1,4 @@
+
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const bcrypt = require('bcryptjs');
@@ -51,12 +52,11 @@ const Usuario = sequelize.define('Usuario', {
   }
 });
 
-// Método para verificar contraseña
-Usuario.prototype.verificarContraseña = async function(contraseña) {
-  return await bcrypt.compare(contraseña, this.contraseña);
+Usuario.prototype.verificarContraseña = async function(plain) {
+  return bcrypt.compare(plain, this.contraseña);
 };
 
-// Método para obtener datos públicos del usuario
+
 Usuario.prototype.toJSON = function() {
   const values = { ...this.get() };
   delete values.contraseña;

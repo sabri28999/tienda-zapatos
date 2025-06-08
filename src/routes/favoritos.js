@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const { Favorito, Producto } = require('../models');
 
-// GET /api/favoritos - Obtener favoritos del usuario
+
 router.get('/', auth, async (req, res) => {
   try {
     const favoritos = await Favorito.findAll({
@@ -19,18 +19,18 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// POST /api/favoritos - Agregar producto a favoritos
+
 router.post('/', auth, async (req, res) => {
   try {
     const { idProducto } = req.body;
 
-    // Verificar si el producto existe
+   
     const producto = await Producto.findByPk(idProducto);
     if (!producto) {
       return res.status(404).json({ message: 'Producto no encontrado' });
     }
 
-    // Verificar si ya está en favoritos
+    
     const favoritoExistente = await Favorito.findOne({
       where: {
         idUsuario: req.usuario.idUsuario,
@@ -42,7 +42,6 @@ router.post('/', auth, async (req, res) => {
       return res.status(400).json({ message: 'El producto ya está en favoritos' });
     }
 
-    // Crear favorito
     const favorito = await Favorito.create({
       idUsuario: req.usuario.idUsuario,
       idProducto
@@ -54,7 +53,6 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// DELETE /api/favoritos/:idProducto - Eliminar producto de favoritos
 router.delete('/:idProducto', auth, async (req, res) => {
   try {
     const eliminado = await Favorito.destroy({
