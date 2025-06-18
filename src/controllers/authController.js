@@ -1,4 +1,4 @@
-const { Usuario } = require('../models');
+const { Usuario, Carrito } = require('../models');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
@@ -42,6 +42,11 @@ const registro = async (req, res) => {
       email,
       contraseña: hashedPassword,
       esAdmin: false
+    });
+
+    // Crear carrito para el nuevo usuario
+    await Carrito.create({
+      idUsuario: usuario.idUsuario
     });
 
     // Generar JWT
