@@ -32,15 +32,11 @@ const registro = async (req, res) => {
       return res.status(400).json({ message: 'El email ya está registrado' });
     }
 
-    // 🔒 Encriptar contraseña antes de guardar
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(contraseña, salt);
-
-    // Crear nuevo usuario
+    // NO hashear aquí, solo guardar la contraseña en texto plano
     const usuario = await Usuario.create({
       nombre,
       email,
-      contraseña: hashedPassword,
+      contraseña, // <--- texto plano, el modelo lo hashea
       esAdmin: false
     });
 

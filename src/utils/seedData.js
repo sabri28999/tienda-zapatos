@@ -21,6 +21,15 @@ async function seedData() {
 
     // Crear talles
     const talles = await Talle.bulkCreate([
+      { valor: '26' },
+      { valor: '27' },
+      { valor: '28' },
+      { valor: '29' },
+      { valor: '30' },
+      { valor: '31' },
+      { valor: '32' },
+      { valor: '33' },
+      { valor: '34' },
       { valor: '35' },
       { valor: '36' },
       { valor: '37' },
