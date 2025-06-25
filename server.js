@@ -3,11 +3,15 @@ const app = express();
 const { sequelize } = require('./src/models');
 const seedData = require('./src/utils/seedData');
 const cors = require('cors');
+const path = require('path');
 
 // Middlewares básicos
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());  // Necesitarás instalar: npm install cors
+
+// Servir archivos estáticos de imágenes
+app.use('/images', express.static(path.join(__dirname, 'src/public/images')));
 
 // Importar rutas
 const authRoutes = require('./src/routes/auth');
