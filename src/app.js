@@ -1,8 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-
+const path = require('path');
 const app = express();
+
+// Servir archivos estáticos desde la carpeta /public/images
+app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
+app.get('/test', (req, res) => {
+  res.send('Servidor Express funcionando ✅');
+});
 
 // Middlewares globales
 app.use(cors({
@@ -38,5 +44,12 @@ app.use((err, req, res, next) => {
 app.use('*', (req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });
 });
+
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});
+
 
 module.exports = app;

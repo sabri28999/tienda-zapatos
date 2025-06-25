@@ -83,7 +83,7 @@ async function seedData() {
         nombreProducto: 'Nike Air Max 90',
         descripcion: 'Zapatillas deportivas con amortiguación Air Max',
         precio: 12999.99,
-        imagenURL: 'https://example.com/nike-air-max-90.jpg',
+        imagenURL: 'http://localhost:3001/images/nike.jpg',
         stock: true,
         idCategoria: 1 // Deportivos
       },
@@ -91,7 +91,7 @@ async function seedData() {
         nombreProducto: 'Zapatos Oxford Negros',
         descripcion: 'Zapatos formales de cuero genuino',
         precio: 8999.99,
-        imagenURL: 'https://example.com/oxford-negros.jpg',
+        imagenURL: 'http://localhost:3001/images/ZapatosOxfordNegros.jpg',
         stock: true,
         idCategoria: 2 // Formales
       },
@@ -99,7 +99,7 @@ async function seedData() {
         nombreProducto: 'Converse Chuck Taylor',
         descripcion: 'Zapatillas casuales clásicas',
         precio: 7499.99,
-        imagenURL: 'https://example.com/converse-chuck.jpg',
+        imagenURL: 'http://localhost:3001/images/ConverseChuckTaylor.jpg',
         stock: true,
         idCategoria: 3 // Casuales
       },
@@ -107,7 +107,7 @@ async function seedData() {
         nombreProducto: 'Botas Dr. Martens',
         descripcion: 'Botas de cuero resistentes',
         precio: 15999.99,
-        imagenURL: 'https://example.com/dr-martens.jpg',
+        imagenURL: 'http://localhost:3001/images/Botas.jpg',
         stock: false,
         idCategoria: 4 // Botas
       },
@@ -115,7 +115,7 @@ async function seedData() {
         nombreProducto: 'Sandalias Havaianas',
         descripcion: 'Sandalias de goma cómodas',
         precio: 2999.99,
-        imagenURL: 'https://example.com/havaianas.jpg',
+        imagenURL: 'http://localhost:3001/images/SandaliasHavaianas.jpg',
         stock: true,
         idCategoria: 5 // Sandalias
       }
