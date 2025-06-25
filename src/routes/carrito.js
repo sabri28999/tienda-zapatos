@@ -74,6 +74,41 @@ router.post('/items', auth, async (req, res) => {
   }
 });
 
+// PUT para actualizar cantidad
+router.put('/items', auth, async (req, res) => {
+  try {
+    const { idProducto, cantidad } = req.body;
+    
+    const carrito = await Carrito.findOne({
+      where: { idUsuario: req.usuario.idUsuario }
+    });
+    
+    if (!carrito) {
+      return res.status(404).json({ message: 'Carrito no encontrado' });
+    }
+    
+    // Buscar el item en el carrito
+    const itemCarrito = await ItemCarrito.findOne({
+      where: {
+        idCarrito: carrito.idCarrito,
+        idProducto
+      }
+    });
+    
+    if (!itemCarrito) {
+      return res.status(404).json({ message: 'Item no encontrado en el carrito' });
+    }
+    
+    // Actualizar cantidad
+    itemCarrito.cantidad = cantidad;
+    await itemCarrito.save();
+    
+    res.json(itemCarrito);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 // Eliminar item del carrito
 router.delete('/items/:idProducto', auth, async (req, res) => {
   try {
