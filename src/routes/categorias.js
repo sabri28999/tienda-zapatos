@@ -7,13 +7,23 @@ const { Categoria, Producto } = require('../models');
 // GET /api/categorias - Obtener todas las categorías
 router.get('/', async (req, res) => {
   try {
-    const categorias = await Categoria.findAll({
-      include: [{
-        model: Producto,
-        as: 'productos'
-      }]
-    });
-    res.json(categorias);
+    // Categorías principales y subcategorías (SEASON & STYLE) hardcodeadas
+    const principales = [
+      "SNEAKERS",
+      "Urban",
+      "Sports",
+      "Fashion",
+      "Canvas",
+      "Basic"
+    ];
+    const seasonStyle = [
+      "Night",
+      "Winter",
+      "Summer",
+      "Kids",
+      "Men"
+    ];
+    res.json({ principales, seasonStyle });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

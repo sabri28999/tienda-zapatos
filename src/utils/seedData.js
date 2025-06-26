@@ -12,11 +12,17 @@ async function seedData() {
 
     // Crear categorías
     const categorias = await Categoria.bulkCreate([
-      { nombreCategoria: 'Deportivos' },
-      { nombreCategoria: 'Formales' },
-      { nombreCategoria: 'Casuales' },
-      { nombreCategoria: 'Botas' },
-      { nombreCategoria: 'Sandalias' }
+      { nombreCategoria: 'SNEAKERS' },
+      { nombreCategoria: 'Urban' },
+      { nombreCategoria: 'Sports' },
+      { nombreCategoria: 'Fashion' },
+      { nombreCategoria: 'Canvas' },
+      { nombreCategoria: 'Basic' },
+      { nombreCategoria: 'Night' },
+      { nombreCategoria: 'Winter' },
+      { nombreCategoria: 'Summer' },
+      { nombreCategoria: 'Kids' },
+      { nombreCategoria: 'Men' }
     ], { ignoreDuplicates: true });
 
     // Crear talles
