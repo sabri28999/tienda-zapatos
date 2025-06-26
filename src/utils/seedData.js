@@ -114,7 +114,7 @@ async function seedData() {
         descripcion: 'Botas de cuero resistentes',
         precio: 15999.99,
         imagenURL: 'http://localhost:3001/images/Botas.jpg',
-        stock: false,
+        stock: true,
         idCategoria: 4 // Botas
       },
       {
