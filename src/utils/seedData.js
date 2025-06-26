@@ -110,6 +110,46 @@ async function seedData() {
         idCategoria: 3 // Casuales
       },
       {
+        nombreProducto: 'Vans knu',
+        descripcion: 'Zapatillas casuales clásicas',
+        precio: 7499.99,
+        imagenURL: 'http://localhost:3001/images/vans.jpg',
+        stock: true,
+        idCategoria: 3 // Casuales
+      },
+      {
+        nombreProducto: 'Puma',
+        descripcion: 'Zapatillas urbanas con diseño moderno, cómodas y versátiles.',
+        precio: 7499.99,
+        imagenURL: 'http://localhost:3001/images/urbanas1.jpg',
+        stock: true,
+        idCategoria: 3 // Casuales
+      },
+      {
+        nombreProducto: 'Adidas Run Sport',
+        descripcion: 'Zapatillas deportivas ligeras y transpirables, ideales para correr o entrenar.',
+        precio: 7499.99,
+        imagenURL: 'http://localhost:3001/images/vans2.jpg',
+        stock: true,
+        idCategoria: 3 // Casuales
+      },
+      {
+        nombreProducto: 'Adidas Campus Grey',
+        descripcion: 'Zapatillas urbanas con estilo retro',
+        precio: 7499.99,
+        imagenURL: 'http://localhost:3001/images/CAMPUS.jpg',
+        stock: true,
+        idCategoria: 3 // Casuales
+      },
+      {
+        nombreProducto: 'Vans Urban Style',
+        descripcion: 'Zapatillas urbanas con diseño moderno y atemporal, cómodas y versátiles para el día a día. Ideales para combinar con cualquier outfit casual.',
+        precio: 7499.99,
+        imagenURL: 'http://localhost:3001/images/DEP.jpg',
+        stock: true,
+        idCategoria: 3 // Casuales
+      },
+      {
         nombreProducto: 'Botas Dr. Martens',
         descripcion: 'Botas de cuero resistentes',
         precio: 15999.99,
