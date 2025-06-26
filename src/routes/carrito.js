@@ -54,21 +54,25 @@ router.post('/items', auth, async (req, res) => {
         idProducto
       }
     });
-
+    
     if (itemCarrito) {
-      // Actualizar cantidad si ya existe
-      itemCarrito.cantidad = cantidad;
-      await itemCarrito.save();
-    } else {
-      // Crear nuevo item si no existe
-      itemCarrito = await ItemCarrito.create({
-        idCarrito: carrito.idCarrito,
-        idProducto,
-        cantidad
-      });
-    }
+    // Actualizar cantidad si ya existe
+    itemCarrito.cantidad += cantidad; // Cambié = por += para sumar
+    await itemCarrito.save();
+  } else {
+    // Crear nuevo item si no existe
+    itemCarrito = await ItemCarrito.create({
+      idCarrito: carrito.idCarrito,
+      idProducto,
+      cantidad
+    });
+  }
+  
+  const itemCompleto = await ItemCarrito.findByPk(itemCarrito.idItemCarrito, {
+    include: [{ model: Producto, as: 'producto' }]
+  });
 
-    res.status(201).json(itemCarrito);
+  res.status(201).json(itemCompleto);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
